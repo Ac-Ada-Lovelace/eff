@@ -1,9 +1,9 @@
 <template>
-  <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+  <div class="register-container">
+    <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="register-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">Registration Form</h3>
       </div>
 
       <el-form-item prop="username">
@@ -12,7 +12,7 @@
         </span>
         <el-input
           ref="username"
-          v-model="loginForm.username"
+          v-model="registerForm.username"
           placeholder="Username"
           name="username"
           type="text"
@@ -28,37 +28,37 @@
         <el-input
           :key="passwordType"
           ref="password"
-          v-model="loginForm.password"
+          v-model="registerForm.password"
           :type="passwordType"
           placeholder="Password"
           name="password"
           tabindex="2"
           auto-complete="on"
-          @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
 
-      <el-form-item prop="captcha">
-        <span class="captcha-container">
-          <span>{{ captchaQuestion }}</span>
+      <el-form-item prop="confirmPassword">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
         </span>
         <el-input
-          ref="captcha"
-          v-model="loginForm.captcha"
-          placeholder="Answer"
-          name="captcha"
-          type="text"
+          v-model="registerForm.confirmPassword"
+          :type="passwordType"
+          placeholder="Confirm Password"
+          name="confirmPassword"
           tabindex="3"
-          auto-complete="off"
+          auto-complete="on"
         />
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleRegister">Register</el-button>
 
-      <el-button type="text" @click="$router.push('/sign-up')" style="width:100%;margin-bottom:30px;">Sign Up</el-button>
+      <div class="tips">
+        <span>Note: Password must be at least 6 characters.</span>
+      </div>
 
     </el-form>
   </div>
@@ -68,85 +68,57 @@
 import { validUsername } from '@/utils/validate'
 
 export default {
-  name: 'Login',
+  name: 'Register',
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('Please enter a valid username'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('The password cannot be less than 6 characters'))
       } else {
         callback()
       }
     }
-    const validateCaptcha = (rule, value, callback) => {
-      if (parseInt(value) !== this.captchaAnswer) {
-        callback(new Error('Incorrect answer'))
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (value !== this.registerForm.password) {
+        callback(new Error('Passwords do not match'))
       } else {
         callback()
       }
     }
     return {
-      loginForm: {
-        username: 'admin',
-        password: '111111',
-        captcha: ''
+      registerForm: {
+        username: '',
+        password: '',
+        confirmPassword: ''
       },
-      loginRules: {
+      registerRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }],
-        captcha: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
+        confirmPassword: [{ required: true, trigger: 'blur', validator: validateConfirmPassword }]
       },
       loading: false,
-      passwordType: 'password',
-      redirect: undefined,
-      captchaQuestion: '',
-      captchaAnswer: 0
-    }
-  },
-  created() {
-    this.generateCaptcha()
-  },
-  watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
+      passwordType: 'password'
     }
   },
   methods: {
     showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
-      } else {
-        this.passwordType = 'password'
-      }
+      this.passwordType = this.passwordType === 'password' ? '' : 'password'
       this.$nextTick(() => {
         this.$refs.password.focus()
       })
     },
-    generateCaptcha() {
-      const num1 = Math.floor(Math.random() * 10)
-      const num2 = Math.floor(Math.random() * 10)
-      this.captchaQuestion = `${num1} + ${num2} = ?`
-      this.captchaAnswer = num1 + num2
-    },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+    handleRegister() {
+      this.$refs.registerForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
+          // Handle registration logic here
+          this.loading = false
         } else {
           console.log('error submit!!')
           return false
@@ -158,21 +130,11 @@ export default {
 </script>
 
 <style lang="scss">
-/* 修复input 背景不协调 和光标变色 */
-/* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
-
-$bg:#283443;
-$light_gray:#fff;
+$bg: #283443;
+$light_gray: #fff;
 $cursor: #fff;
 
-@supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-  .login-container .el-input input {
-    color: $cursor;
-  }
-}
-
-/* reset element-ui css */
-.login-container {
+.register-container {
   .el-input {
     display: inline-block;
     height: 47px;
@@ -181,17 +143,13 @@ $cursor: #fff;
     input {
       background: transparent;
       border: 0px;
+      appearance: none;
       -webkit-appearance: none;
       border-radius: 0px;
       padding: 12px 5px 12px 15px;
       color: $light_gray;
       height: 47px;
       caret-color: $cursor;
-
-      &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: $cursor !important;
-      }
     }
   }
 
@@ -205,17 +163,17 @@ $cursor: #fff;
 </style>
 
 <style lang="scss" scoped>
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$dark_gray: #889aa4;
+$light_gray: #eee;
 
-.login-container {
+.register-container {
   min-height: 100%;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
 
-  .login-form {
+  .register-form {
     position: relative;
     width: 520px;
     max-width: 100%;
@@ -228,12 +186,6 @@ $light_gray:#eee;
     font-size: 14px;
     color: #fff;
     margin-bottom: 10px;
-
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
   }
 
   .svg-container {
@@ -264,13 +216,6 @@ $light_gray:#eee;
     color: $dark_gray;
     cursor: pointer;
     user-select: none;
-  }
-
-  .captcha-container {
-    padding: 6px 5px 6px 15px;
-    color: $dark_gray;
-    vertical-align: middle;
-    display: inline-block;
   }
 }
 </style>
