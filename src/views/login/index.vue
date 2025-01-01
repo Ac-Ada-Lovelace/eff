@@ -58,7 +58,7 @@
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
-      <el-button type="text" @click="$router.push('/sign-up')" style="width:100%;margin-bottom:30px;">Sign Up</el-button>
+      <el-button type="text" style="width:100%;margin-bottom:30px;" @click="$router.push('/sign-up')">Sign Up</el-button>
 
     </el-form>
   </div>
@@ -78,7 +78,7 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
+      if (value.length < 1) {
         callback(new Error('The password can not be less than 6 digits'))
       } else {
         callback()
@@ -93,8 +93,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111',
+        username: '',
+        password: '',
         captcha: ''
       },
       loginRules: {
