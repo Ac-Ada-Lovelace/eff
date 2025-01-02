@@ -93,8 +93,8 @@ export default {
     }
     return {
       loginForm: {
-        username: '',
-        password: '',
+        username: 'test',
+        password: 'test',
         captcha: ''
       },
       loginRules: {
